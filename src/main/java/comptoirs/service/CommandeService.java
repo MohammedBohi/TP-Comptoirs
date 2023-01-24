@@ -1,7 +1,11 @@
 package comptoirs.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
+import com.sun.jdi.connect.IllegalConnectorArgumentsException;
+import comptoirs.dao.LigneRepository;
+import comptoirs.entity.Ligne;
 import org.springframework.stereotype.Service;
 
 import comptoirs.dao.ClientRepository;
@@ -14,7 +18,7 @@ public class CommandeService {
     // La couche "Service" utilise la couche "Accès aux données" pour effectuer les traitements
     private final CommandeRepository commandeDao;
     private final ClientRepository clientDao;
-    
+
 
     // @Autowired
     // La couche "Service" utilise la couche "Accès aux données" pour effectuer les traitements
@@ -63,7 +67,21 @@ public class CommandeService {
      */
     @Transactional
     public Commande enregistreExpédition(Integer commandeNum) {
-        // TODO : implémenter ce service métier
-        throw new UnsupportedOperationException("Pas encore implémenté");
+        // vérifie que la commande existe
+        var commande = commandeDao.findById(commandeNum).orElseThrow();
+        // la commande ne doit pas etre déjà envoyée
+        var exp=commande.getEnvoyeele();
+        if (exp!=null){
+throw new IllegalStateException(" la commande c est déjà expédié");
+// mise à jour de la date
+        }
+        commande.setEnvoyeele(LocalDate.now());
+   for (Ligne l:commande.getLignes()){
+         var produit =l.getProduit();
+         var stock=produit.getUnitesEnStock();
+         produit.setUnitesEnStock(stock-l.getQuantite());
+
+   }
+        return commande;
     }
 }
